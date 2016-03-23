@@ -1,4 +1,4 @@
-# SystemJS Sass plugin
+# SystemJS Sass plugin specially for angular2
 
 A [Sass](http://sass-lang.com/) loader plugin for
 [SystemJS](https://github.com/systemjs/systemjs), based on

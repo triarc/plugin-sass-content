@@ -23,7 +23,7 @@ followed by a `!` to trigger the use of this plugin:
 // for this to work in ts, you need tsc 1.9.*+ because you should have
 // wildcard module declaration
 declare module "scss!*" {
-  let css: any;
+  let css: string;
   export default css;
 }
 

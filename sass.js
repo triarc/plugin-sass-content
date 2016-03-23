@@ -1,4 +1,4 @@
-if (typeof window !== 'undefined') {
+
   var Sass = require('sass.js/dist/sass');
   var sass = new Sass();
 
@@ -24,34 +24,25 @@ if (typeof window !== 'undefined') {
     });
   });
 
-
-  var head = document.getElementsByTagName('head')[0];
-
-  // get all injected style tags in the page
-  var styles = document.getElementsByTagName('style');
-  var styleIds = [];
-  for (var i = 0; i < styles.length; i++) {
-    if (styles[i].hasAttribute("data-href")) {
-      styleIds.push(styles[i].getAttribute("data-href"));
-    }
-  }
-
-  function fetch(load) {
-    // don't reload styles loaded in the head
-    for (var i = 0; i < styleIds.length; i++) {
-      if (load.address === styleIds[i]) {
-        return '';
-      }
-    }
-    return loadStyle(load.address);
-  }
-
-  exports.fetch = fetch;
-
-} else {
   // setting format = 'defined' means we're managing our own output
   function translate(load) {
-    load.metadata.format = 'defined';
+      
+      return new Promise(function(resolve, reject) {
+      sass.compile(load.source, {
+        inputPath: load.address
+      }, function(result) {
+        var successful = result.status === 0;
+        if (successful) {
+           
+          load.metadata.format = 'esm';
+  
+          resolve('export default ' + JSON.stringify(result.text) + ";");
+        } else {
+          reject(result.formatted);
+        }
+      });
+    });
+    
   }
 
   // dynamically load external sass-builder to avoid bundling
@@ -66,9 +57,6 @@ if (typeof window !== 'undefined') {
 
   exports.translate = translate;
   exports.bundle = bundle;
-}
-
-
 
 function fetchText(url) {
   return new Promise(function(resolve, reject) {
@@ -90,48 +78,3 @@ function fetchText(url) {
     request.send();
   });
 }
-
-
-function base64(text) {
-  return window.btoa(text);
-}
-
-// inject style into the head as a style tag
-// Note: use link and data-URI to allow source maps to work, unlike <style>
-function injectStyle(css, url) {
-  var base64css = base64(css);
-  var link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href= 'data:text/css;charset=utf-8;base64,' + base64css;
-  head.appendChild(link);
-}
-
-/*
-// inject style into the head as a style tag
-function injectStyle(css, url) {
-  var style = document.createElement('style');
-  style.textContent = css;
-  style.setAttribute('type', 'text/css');
-  style.setAttribute('data-type', 'text/scss');
-  style.setAttribute('data-href', url);
-  head.appendChild(style);
-}
-*/
-
-function loadStyle(url) {
-  return fetchText(url).then(function(data) {
-    return new Promise(function(resolve, reject) {
-      sass.compile(data, {
-        inputPath: url
-      }, function(result) {
-        var successful = result.status === 0;
-        if (successful) {
-          injectStyle(result.text, url);
-          resolve('');
-        } else {
-          reject(result.formatted);
-        }
-      });
-    });
-  });
-};

@@ -20,7 +20,17 @@ Add a dependency to a `.scss` file from within your JavaScript files,
 followed by a `!` to trigger the use of this plugin:
 
 ``` ts
-import {css} from 'styles.scss!';
+// for this to work in ts, you need tsc 1.9.*+ because you should have
+// wildcard module declaration
+declare module "scss!*" {
+  let css: any;
+  export default css;
+}
 
+import {css} from 'styles.scss!';
+@Component({
+  selector: 'demo-app',
+  styles: [css]
+})
 ```
 

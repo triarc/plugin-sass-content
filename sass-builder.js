@@ -65,7 +65,7 @@ sass.importer(function(request, done) {
     .catch(function() {return done()});
 });
 
-exports = function(loads, compileOpts) {
+exports.default = function(loads, compileOpts) {
   var stubDefines = loads.map(function(load) {
     return `${(compileOpts.systemGlobal || 'System')}\.register('${load.name}', [], false, function() {});`;
   }).join('\n');

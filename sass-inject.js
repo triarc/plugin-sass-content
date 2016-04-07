@@ -88,7 +88,7 @@ var compile = function(scss) {
   });
 };
 
-exports=function(load) {
+exports.default =function(load) {
   var basePath = path.dirname(url.parse(load.address).pathname);
   if (basePath !== '/') {
     basePath += '/';

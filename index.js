@@ -5,7 +5,7 @@ var bundle;
 if (typeof window !== 'undefined') {
   fetch = function(load) {
     return System.import(__dirname + '/sass-inject')
-      .then(function(inject){ return inject(load)});
+      .then(function(inject){ return inject.default(load)});
   };
 } else {
   // setting format = 'defined' means we're managing our own output
@@ -14,7 +14,7 @@ if (typeof window !== 'undefined') {
   };
   bundle = function bundler(loads, opts) {
     return System.import(__dirname + '/sass-builder')
-      .then(function(builder){ return builder.call(System, loads, opts)});
+      .then(function(builder){ return builder.default.call(System, loads, opts)});
   };
 }
 

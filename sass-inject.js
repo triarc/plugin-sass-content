@@ -15,13 +15,13 @@ var resolvePath = require( './resolve-path');
 
 var importSass = new Promise(function(resolve, reject) {
   if (Modernizr.webworkers) {
-    System.import('sass.js/dist/sass', __moduleName).then(function(Sass) {
-      System.normalize('sass.js/dist/sass.worker', __moduleName).then(function(worker) {
+    System.import('sass.js/dist/sass').then(function(Sass) {
+      System.normalize('/sass.js/dist/sass.worker').then(function(worker) {
         resolve(new Sass(worker));
       });
     }).catch(function(err) {return reject(err);});
   } else {
-    System.import('sass.js/dist/sass.sync', __moduleName).then(function(Sass) {
+    System.import('sass.js/dist/sass.sync').then(function(Sass) {
       resolve(Sass);
     }).catch(function(err) {return reject(err);});
   }

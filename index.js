@@ -4,7 +4,7 @@ var bundle;
 
 if (typeof window !== 'undefined') {
   fetch = function(load) {
-    return System.import('./sass-inject', { name: "sass-inject" })
+    return System.import(__dirname + '/sass-inject')
       .then(function(inject){ return inject.default(load)});
   };
 } else {
@@ -13,7 +13,7 @@ if (typeof window !== 'undefined') {
     load.metadata.format = 'defined';
   };
   bundle = function bundler(loads, opts) {
-    return System.import('./sass-builder', { name: "sass-builder" })
+    return System.import(__dirname + '/sass-builder')
       .then(function(builder){ return builder.default.call(System, loads, opts)});
   };
 }

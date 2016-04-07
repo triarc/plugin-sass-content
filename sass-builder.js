@@ -1,18 +1,18 @@
-import autoprefixer from 'autoprefixer';
-import cloneDeep from 'lodash/cloneDeep';
-import fs from 'fs';
-import isEmpty from 'lodash/isEmpty';
-import isUndefined from 'lodash/isUndefined';
-import path from 'path';
-import postcss from 'postcss';
-import sass from 'sass.js';
+var autoprefixer =  require('autoprefixer');
+var cloneDeep = require('lodash/cloneDeep');
+var fs = require( 'fs');
+var isEmpty = require( 'lodash/isEmpty');
+var isUndefined = require( 'lodash/isUndefined');
+var path = require( 'path');
+var postcss = require( 'postcss');
+var sass = require( 'sass.js');
 
-import resolvePath from './resolve-path';
+var resolvePath = require( './resolve-path');
 
-const cssInject = "(function(c){if (typeof document == 'undefined') return; var d=document,a='appendChild',i='styleSheet',s=d.createElement('style');s.type='text/css';d.getElementsByTagName('head')[0][a](s);s[i]?s[i].cssText=c:s[a](d.createTextNode(c));})";
-const isWin = process.platform.match(/^win/);
+var cssInject = "(function(c){if (typeof document == 'undefined') return; var d=document,a='appendChild',i='styleSheet',s=d.createElement('style');s.type='text/css';d.getElementsByTagName('head')[0][a](s);s[i]?s[i].cssText=c:s[a](d.createTextNode(c));})";
+var isWin = process.platform.match(/^win/);
 
-const escape = source => {
+var escape = function(source) {
   return source
     .replace(/(["\\])/g, '\\$1')
     .replace(/[\f]/g, '\\f')
@@ -25,9 +25,9 @@ const escape = source => {
     .replace(/[\u2029]/g, '\\u2029');
 };
 
-const loadFile = file => {
-  return new Promise((resolve, reject) => {
-    fs.readFile(file, { encoding: 'UTF-8' }, (err, data) => {
+var loadFile = function(file) {
+  return new Promise(function(resolve, reject) {
+    fs.readFile(file, { encoding: 'UTF-8' }, function(err, data) {
       if (err) {
         reject(err);
       } else {
@@ -37,43 +37,43 @@ const loadFile = file => {
   });
 };
 
-const fromFileURL = url => {
-  const address = decodeURIComponent(url.replace(/^file:(\/+)?/i, ''));
+var fromFileURL = function(url) {
+  var address = decodeURIComponent(url.replace(/^file:(\/+)?/i, ''));
   return !isWin ? `/${address}` : address.replace(/\//g, '\\');
 };
 
 // intercept file loading requests (@import directive) from libsass
-sass.importer((request, done) => {
+sass.importer(function(request, done) {
   // Currently only supporting scss imports due to
   // https://github.com/sass/libsass/issues/1695
-  let content;
-  let resolved;
-  let readImportPath;
-  let readPartialPath;
+  var content;
+  var resolved;
+  var readImportPath;
+  var readPartialPath;
   resolvePath(request)
-    .then(importUrl => {
+    .then(function(importUrl) {
       resolved = importUrl;
-      const partialUrl = importUrl.replace(/\/([^/]*)$/, '/_$1');
+      var partialUrl = importUrl.replace(/\/([^/]*)$/, '/_$1');
       readImportPath = fromFileURL(importUrl);
       readPartialPath = fromFileURL(partialUrl);
       return loadFile(readPartialPath);
     })
-    .then(data => content = data)
-    .catch(() => loadFile(readImportPath))
-    .then(data => content = data)
-    .then(() => done({ content, path: resolved }))
-    .catch(() => done());
+    .then(function(data) { return content = data})
+    .catch(function() { return loadFile(readImportPath)})
+    .then(function(data) {return content = data})
+    .then(function() { return done({ content, path: resolved })})
+    .catch(function() {return done()});
 });
 
-export default (loads, compileOpts) => {
-  const stubDefines = loads.map(load => {
+exports = function(loads, compileOpts) {
+  var stubDefines = loads.map(function(load) {
     return `${(compileOpts.systemGlobal || 'System')}\.register('${load.name}', [], false, function() {});`;
   }).join('\n');
 
-  const compilePromise = load => {
-    return new Promise((resolve, reject) => {
-      const urlBase = `${path.dirname(load.address)}/`;
-      let options = {};
+  var compilePromise = function(load) {
+    return new Promise(function(resolve, reject) {
+      var urlBase = `${path.dirname(load.address)}/`;
+      var options = {};
       if (!isUndefined(System.sassPluginOptions) &&
           !isUndefined(System.sassPluginOptions.sassOptions)) {
         options = cloneDeep(System.sassPluginOptions.sassOptions);
@@ -85,27 +85,27 @@ export default (loads, compileOpts) => {
       if (isEmpty(load.source)) {
         return resolve('');
       }
-      sass.compile(load.source, options, ({ status, text, formatted }) => {
-        if (status === 0) {
+      sass.compile(load.source, options, function(result) {
+        if (result.status === 0) {
           if (!isUndefined(System.sassPluginOptions) &&
               System.sassPluginOptions.autoprefixer) {
-            postcss([autoprefixer]).process(text).then(({ css }) => {
-              resolve(css);
+            postcss([autoprefixer]).process(result.text).then(function(compilationResult) {
+              resolve(compilationResult.css);
             });
           } else {
-            resolve(text);
+            resolve(result.text);
           }
         } else {
-          reject(formatted);
+          reject(result.formatted);
         }
       });
     });
   };
-  return new Promise((resolve, reject) => {
+  return new Promise(function(resolve, reject) {
     // Keep style order
     Promise.all(loads.map(compilePromise))
     .then(
-      response => resolve([stubDefines, cssInject, `("${escape(response.reverse().join(''))}");`].join('\n')),
-      reason => reject(reason));
+      function(response) {return  resolve([stubDefines, cssInject, `("${escape(response.reverse().join(''))}");`].join('\n')); },
+      function(reason) { return reject(reason);};
   });
 };

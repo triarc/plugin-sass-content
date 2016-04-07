@@ -1,101 +1,101 @@
 /* global Modernizr __moduleName */
 
-import './modernizr';
+require('./modernizr');
 
-import autoprefixer from 'autoprefixer';
-import isEmpty from 'lodash/isEmpty';
-import isString from 'lodash/isString';
-import isUndefined from 'lodash/isUndefined';
-import path from 'path';
-import postcss from 'postcss';
-import reqwest from 'reqwest';
-import url from 'url';
+var autoprefixer = require( 'autoprefixer');
+var isEmpty = require( 'lodash/isEmpty');
+var isString = require( 'lodash/isString');
+var isUndefined = require( 'lodash/isUndefined');
+var path = require( 'path');
+var postcss = require( 'postcss');
+var reqwest = require( 'reqwest');
+var url = require( 'url');
 
-import resolvePath from './resolve-path';
+var resolvePath = require( './resolve-path');
 
-const importSass = new Promise((resolve, reject) => {
+var importSass = new Promise(function(resolve, reject) {
   if (Modernizr.webworkers) {
-    System.import('sass.js/dist/sass', __moduleName).then(Sass => {
-      System.normalize('sass.js/dist/sass.worker', __moduleName).then(worker => {
+    System.import('sass.js/dist/sass', __moduleName).then(function(Sass) {
+      System.normalize('sass.js/dist/sass.worker', __moduleName).then(function(worker) {
         resolve(new Sass(worker));
       });
-    }).catch(err => reject(err));
+    }).catch(function(err) {return reject(err);});
   } else {
-    System.import('sass.js/dist/sass.sync', __moduleName).then(Sass => {
+    System.import('sass.js/dist/sass.sync', __moduleName).then(function(Sass) {
       resolve(Sass);
-    }).catch(err => reject(err));
+    }).catch(function(err) {return reject(err);});
   }
 });
 
-const sassImporter = (request, done) => {
-  let resolved;
-  let content;
+var sassImporter = function(request, done) {
+  var resolved;
+  var content;
   // Currently only supporting scss imports due to
   // https://github.com/sass/libsass/issues/1695
-  resolvePath(request).then(resolvedUrl => {
+  resolvePath(request).then(function(resolvedUrl) {
     resolved = resolvedUrl;
-    const partialPath = resolved.replace(/\/([^/]*)$/, '/_$1');
+    var partialPath = resolved.replace(/\/([^/]*)$/, '/_$1');
     return reqwest(partialPath);
   })
-    .then(resp => {
+    .then(function(resp) {
       // In Cordova Apps the response is the raw XMLHttpRequest
       content = resp.responseText ? resp.responseText : resp;
       return content;
     })
-    .catch(() => reqwest(resolved))
-    .then(resp => {
+    .catch(function(){return reqwest(resolved)})
+    .then(function(resp) {
       content = resp.responseText ? resp.responseText : resp;
       return content;
     })
-    .then(() => done({ content, path: resolved }))
-    .catch(() => done());
+    .then(function() { return done({ content, path: resolved });})
+    .catch(function() {return done()});
 };
 
-// intercept file loading requests (@import directive) from libsass
-importSass.then(sass => {
+// intercept file loading requests (@import directive) = require( libsass
+importSass.then(function(sass) {
   sass.importer(sassImporter);
 });
 
-const compile = scss => {
-  return new Promise((resolve, reject) => {
-    const content = scss.content;
-    const responseText = content.responseText;
+var compile = function(scss) {
+  return new Promise(function(resolve, reject) {
+    var content = scss.content;
+    var responseText = content.responseText;
     if (isString(content) && isEmpty(content) ||
         !isUndefined(responseText) && isEmpty(responseText)) {
       return resolve('');
     }
-    importSass.then(sass => {
+    importSass.then(function(sass) {
       function inject(css) {
         
         // return an empty module in the module pipeline itself
         resolve(css);
       }
-      sass.compile(content, scss.options, ({ status, text, formatted }) => {
-        if (status === 0) {
+      sass.compile(content, scss.options, function(result)  {
+        if (result.status === 0) {
           if (!isUndefined(System.sassPluginOptions) &&
               System.sassPluginOptions.autoprefixer) {
-            postcss([autoprefixer]).process(text).then(({ css }) => {
-              inject(css);
+            postcss([autoprefixer]).process(result.text).then(function(cssResponse) {
+              inject(cssResponse.css);
             });
           } else {
-            inject(text);
+            inject(result.text);
           }
         } else {
-          reject(formatted);
+          reject(result.formatted);
         }
       });
     });
   });
 };
 
-export default load => {
-  let basePath = path.dirname(url.parse(load.address).pathname);
+exports=function(load) {
+  var basePath = path.dirname(url.parse(load.address).pathname);
   if (basePath !== '/') {
     basePath += '/';
   }
-  const urlBase = basePath;
-  const indentedSyntax = load.address.endsWith('.sass');
-  let options = {};
+  var urlBase = basePath;
+  var indentedSyntax = load.address.endsWith('.sass');
+  var options = {};
   if (!isUndefined(System.sassPluginOptions) &&
       !isUndefined(System.sassPluginOptions.sassOptions)) {
     options = System.sassPluginOptions.sassOptions;
@@ -105,7 +105,7 @@ export default load => {
   // load initial scss file
   return reqwest(load.address)
     // In Cordova Apps the response is the raw XMLHttpRequest
-    .then(resp => {
+    .then(function(resp) {
       return {
         content: resp.responseText ? resp.responseText : resp,
         options,

@@ -1,25 +1,25 @@
-  import path from 'path';
-import url from 'url';
+var path = require('path');
+var  url = require('url');
 
-const paths = {};
+var paths = {};
 
-const resolvePath = (request) => {
-  return new Promise((resolve, reject) => {
-    const { previous } = request;
-    let { current } = request;
+var resolvePath = function(request) {
+  return new Promise(function(resolve, reject) {
+    var { previous } = request;
+    var { current } = request;
     if (current.substr(0, 5) === 'jspm:') {
       current = current.replace(/^jspm:/, '') + '.scss';
       System.normalize(current)
-        .then(file => resolve(file.replace(/\.js$|\.ts$/, '')))
-        .catch(e => reject(e));
+        .then(function(file) { return resolve(file.replace(/\.js$|\.ts$/, ''));})
+        .catch(function(e) {return reject(e)});
     } else {
-      const prevBase = path.dirname(previous) + '/';
-      const base = (previous === 'stdin') ? request.options.urlBase : paths[previous] || prevBase;
-      const resolved = url.resolve(base, current);
+      var prevBase = path.dirname(previous) + '/';
+      var base = (previous === 'stdin') ? request.options.urlBase : paths[previous] || prevBase;
+      var resolved = url.resolve(base, current);
       if (previous !== 'stdin') paths[current] = path.dirname(resolved) + '/';
       resolve(`${resolved}.scss`);
     }
   });
 };
 
-export default resolvePath;
+exports = resolvePath;

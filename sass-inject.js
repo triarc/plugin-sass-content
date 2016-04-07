@@ -14,7 +14,7 @@ var url = require( 'url');
 var resolvePath = require( './resolve-path');
 
 var importSass = new Promise(function(resolve, reject) {
-  if (Modernizr.webworkers) {
+  if (false){//if (Modernizr.webworkers) {
     System.import('sass.js/dist/sass').then(function(Sass) {
       System.normalize('/sass.js/dist/sass.worker').then(function(worker) {
         resolve(new Sass(worker));

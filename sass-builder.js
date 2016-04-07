@@ -103,9 +103,9 @@ exports.default = function(loads, compileOpts) {
   };
   return new Promise(function(resolve, reject) {
     // Keep style order
-    Promise.all(loads.map(compilePromise))
+    return Promise.all(loads.map(compilePromise))
     .then(
       function(response) {return  resolve([stubDefines, cssInject, `("${escape(response.reverse().join(''))}");`].join('\n')); },
-      function(reason) { return reject(reason);};
+      function(reason) { return reject(reason);});
   });
 };

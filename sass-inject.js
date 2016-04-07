@@ -66,9 +66,8 @@ var compile = function(scss) {
     }
     importSass.then(function(sass) {
       function inject(css) {
-        
-        // return an empty module in the module pipeline itself
-        resolve(css);
+           load.metadata.format = 'esm';
+           resolve('export default ' + JSON.stringify(css) + ";");
       }
       sass.compile(content, scss.options, function(result)  {
         if (result.status === 0) {

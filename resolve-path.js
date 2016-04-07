@@ -13,7 +13,10 @@ var resolvePath = function(request) {
         .then(function(file) { return resolve(file.replace(/\.js$|\.ts$/, ''));})
         .catch(function(e) {return reject(e)});
     } else {
-      var prevBase = path.dirname(previous) + '/';
+      var prevBase = path.dirname(previous);
+      if (prevBase.legth === 0){
+          prevBase += '/';
+      }
       var base = (previous === 'stdin') ? request.options.urlBase : paths[previous] || prevBase;
       var resolved = url.resolve(base, current);
       if (previous !== 'stdin') paths[current] = path.dirname(resolved) + '/';

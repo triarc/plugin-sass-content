@@ -18,4 +18,6 @@ if (typeof window !== 'undefined') {
   };
 }
 
-export { fetch, translate, bundle };
+exports.fetch = fetch;
+exports.translate = translate;
+exports.bundle = bundle;

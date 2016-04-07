@@ -34,7 +34,7 @@ var sassImporter = function(request, done) {
   // https://github.com/sass/libsass/issues/1695
   resolvePath.default(request).then(function(resolvedUrl) {
     resolved = resolvedUrl;
-    var partialPath = resolved.replace(/\/([^/]*)$/, '/_$1');
+    var partialPath = resolved.replace(/\/([^/]*)$/, '/$1');
     return reqwest(partialPath);
   })
     .then(function(resp) {

@@ -32,7 +32,7 @@ var sassImporter = function(request, done) {
   var content;
   // Currently only supporting scss imports due to
   // https://github.com/sass/libsass/issues/1695
-  resolvePath(request).then(function(resolvedUrl) {
+  resolvePath.default(request).then(function(resolvedUrl) {
     resolved = resolvedUrl;
     var partialPath = resolved.replace(/\/([^/]*)$/, '/_$1');
     return reqwest(partialPath);

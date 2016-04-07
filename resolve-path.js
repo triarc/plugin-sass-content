@@ -22,4 +22,4 @@ var resolvePath = function(request) {
   });
 };
 
-exports = resolvePath;
+exports.default = resolvePath;

@@ -66,7 +66,7 @@ var compile = function(scss) {
     }
     importSass.then(function(sass) {
       function inject(css) {
-           load.metadata.format = 'esm';
+           //load.metadata.format = 'esm';
            resolve('export default ' + JSON.stringify(css) + ";");
       }
       sass.compile(content, scss.options, function(result)  {
